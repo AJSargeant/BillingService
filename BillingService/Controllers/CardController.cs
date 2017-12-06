@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BillingService.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Customer,Staff,Admin")]
     public class CardController : Controller
     {
         public BillingContext db;
@@ -26,15 +26,17 @@ namespace BillingService.Controllers
             List<SelectListItem> cardList = new List<SelectListItem>();
             List<Card> cards;
 
-            if (User.IsInRole("User"))
+            if (User.IsInRole("Customer"))
             {
                 cards = db.Cards.Where(c => c.UserID == order.UserID).ToList();
-                cardList.Add(new SelectListItem { Value = "-1", Text = "Add New Payment Method..." });
             }
             else
             {
                 cards = db.Cards.Where(c => c.Type == "Staff").ToList();
             }
+
+            if(User.IsInRole("Customer") || User.IsInRole("Admin"))
+                cardList.Add(new SelectListItem { Value = "-1", Text = "Add New Payment Method..." });
 
             cardList.AddRange(cards.Select(c => new SelectListItem
             {
@@ -50,16 +52,22 @@ namespace BillingService.Controllers
         [HttpPost]
         public ActionResult Progress([FromBody]Models.UserOrder uo)
         {
-            if(uo.SelectedCardID == -1)
+            try
             {
-                return RedirectToAction(nameof(AddCard));
+                if (uo.SelectedCardID == -1)
+                {
+                    return RedirectToAction(nameof(AddCard));
+                }
+                else
+                {
+                    return RedirectToAction(nameof(Finalise), uo);
+                }
             }
-            else
+            catch
             {
-                return RedirectToAction(nameof(Finalise), uo);
+                return new StatusCodeResult(500);
             }
 
-            return new StatusCodeResult(404);
         }
 
         public ActionResult AddCard()
@@ -67,13 +75,14 @@ namespace BillingService.Controllers
             return View();
         }
 
+        [HttpPost]
         public ActionResult AddCardPost([FromBody]Card c)
         {
             try
             {
                 c.UserID = _order.UserID;
-                if (User.IsInRole("User"))
-                    c.Type = "User";
+                if (User.IsInRole("Customer"))
+                    c.Type = "Customer";
                 else
                     c.Type = "Staff";
                 c.Active = true;
