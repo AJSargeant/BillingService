@@ -1,51 +1,70 @@
-﻿@model BillingModel.Card
-
-<h4>Card</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="PayOrder">
-            @using (Html.BeginForm("PayOrderPost", "Card", FormMethod.Post))
-            {
-                <fieldset>
-                    <dl class="dl-horizontal">
-                        @Html.HiddenFor(model => model.Active)
-                        @Html.HiddenFor(model => model.ID)
-                        @Html.HiddenFor(model => model.UserID)
-                    </dl>
-                    <div class="col-md-4">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <div class="form-group">
-                            <label asp-for="CardNumber" class="control-label"></label>
-                            <input asp-for="CardNumber" class="form-control" />
-                            <span asp-validation-for="CardNumber" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="ExpirationDate" class="control-label"></label>
-                            <input asp-for="ExpirationDate" class="form-control" />
-                            <span asp-validation-for="ExpirationDate" class="text-danger"></span>
-                        </div>
-                        <div>
-                            @Html.CheckBox("Save Payment Details?", false)
-                        </div>
-                        <div class="form-group">
-                            <input type="submit" value="Save" class="btn btn-default" />
-                        </div>
-                    </div>
-
-                </fieldset>
-            }
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-default" />
-            </div>
-        </form>
-    </div>
-</div>
+﻿@model BillingService.Models.Orders.Order
 
 <div>
-    <a asp-action="Index">Cancel Transaction</a>
-</div>
+    <h4>Order</h4>
+    <hr />
+    <table class="dl-horizontal">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDate)
+            </th>
+        </tr>
+        <tr>
+            <td>
+                @Html.DisplayFor(model => model.OrderId)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.OrderDate)
+            </td>
+        </tr>
+    </table>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+    <h3>Products</h3>
+    <hr />
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Products[0].Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Products[0].Ean)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Products[0].Quantity)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Products[0].Price)
+                </th>
+                <th>
+                    @Html.DisplayName("Total Price")
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var item in Model.Products)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Ean)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Quantity)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Price)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Price * item.Quantity)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

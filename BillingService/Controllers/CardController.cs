@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace BillingService.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class CardController : Controller
     {
         public BillingContext db;
@@ -14,24 +14,15 @@ namespace BillingService.Controllers
         {
             db = context;
         }
-
-        [HttpGet]
+        
+        [HttpPost]
         public ActionResult PayOrder(Models.Orders.Order order)
         {
-            if(User.FindFirst(ClaimTypes.NameIdentifier).Value == order.UserID)
-            {
+            //if(User.FindFirst(ClaimTypes.NameIdentifier).Value == order.UserID)
+           // {
                 return View(order);
-            }
-            return new StatusCodeResult(403);
-        }
-
-
-
-
-        [HttpPost]
-        public ActionResult PayOrderPost()
-        {
-            return new StatusCodeResult(404);
+           // }
+            //return new StatusCodeResult(403);
         }
     }
 }

@@ -9,6 +9,8 @@ using Microsoft.Extensions.Primitives;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using BillingModel;
+using Microsoft.EntityFrameworkCore;
 
 namespace BillingService
 {
@@ -17,6 +19,7 @@ namespace BillingService
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
         }
 
         public IConfiguration Configuration { get; }
@@ -25,7 +28,7 @@ namespace BillingService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-
+            services.AddDbContext<BillingContext>(options => options.UseSqlServer(Configuration.GetConnectionString("BillingDatabase")));
 
             var tokenValidationParameters = new TokenValidationParameters
             {
