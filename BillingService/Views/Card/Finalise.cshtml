@@ -1,0 +1,58 @@
+﻿@model BillingService.Models.Payment
+
+@using (Html.BeginForm("FinalisePost", "Card", FormMethod.Post))
+{
+    @Html.HiddenFor(model => model.Order)
+    @Html.HiddenFor(model => model.Card)
+    <h3>Payment Details</h3>
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+
+            @{
+                double total = 0;
+                foreach (var item in Model.Order.Products)
+                {
+                    total += (item.Price * item.Quantity);
+                }
+                @Html.Raw("Total Price: £" + total)
+            }
+            
+            @Html.Raw("Card Details")
+            <table>
+                <thead>
+                    <tr>
+                        <td>
+                            @Html.DisplayName("Card Number")
+                        </td>
+                        <td>
+                            @Html.DisplayName("Expiration Date")
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(model => model.Card.CardNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.Card.ExpirationDate)
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="CVV" class="control-label"></label>
+                <input asp-for="CVV" class="form-control" />
+                <span asp-validation-for="CVV" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
