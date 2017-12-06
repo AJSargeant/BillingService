@@ -1,8 +1,6 @@
 ﻿@model BillingService.Models.Orders.Order
 
 <div>
-    <h4>Order</h4>
-    <hr />
     <table class="dl-horizontal">
         <tr>
             <th>
@@ -23,7 +21,6 @@
     </table>
 
     <h3>Products</h3>
-    <hr />
     <table>
         <thead>
             <tr>
@@ -61,10 +58,19 @@
                         @Html.DisplayFor(modelItem => item.Price)
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.Price * item.Quantity)
+                        @Html.Raw("£" + item.Price * item.Quantity)
                     </td>
                 </tr>
             }
         </tbody>
     </table>
+    <br />
+    @{
+        double total = 0;
+        foreach (var item in Model.Products)
+        {
+            total += (item.Price * item.Quantity);
+        }
+        @Html.Raw("Total Price: £" + total)
+    }
 </div>
