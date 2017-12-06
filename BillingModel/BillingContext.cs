@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BillingModel
 {
-    class BillingContext : DbContext
+    public class BillingContext : DbContext
     {
         public BillingContext(DbContextOptions<BillingContext> options) : base(options)
         {

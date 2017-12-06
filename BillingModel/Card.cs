@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BillingModel
 {
-    class Card
+    public class Card
     {
         public int ID { get; set; }
         public string UserID { get; set; }

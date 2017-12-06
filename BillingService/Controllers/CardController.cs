@@ -1,41 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using BillingModel;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BillingService.Controllers
 {
+    [Authorize]
     public class CardController : Controller
     {
-        // GET: Card/Details/5
-        public ActionResult Details(int id)
+        public BillingContext db;
+
+        public CardController(BillingContext context)
         {
-            return View();
-        }
-        
-        // GET: Card/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
+            db = context;
         }
 
-        // POST: Card/Delete/5
+        [HttpGet]
+        public ActionResult PayOrder(Models.Orders.Order order)
+        {
+            if(User.FindFirst(ClaimTypes.NameIdentifier).Value == order.UserID)
+            {
+                return View(order);
+            }
+            return new StatusCodeResult(403);
+        }
+
+
+
+
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult PayOrderPost()
         {
-            try
-            {
-                // TODO: Add delete logic here
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            return new StatusCodeResult(404);
         }
     }
 }
