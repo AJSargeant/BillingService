@@ -16,7 +16,7 @@ namespace BillingService
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("MY TOP SECRET TEST KEY"));
             var claims = new Claim[] {
                 new Claim(ClaimTypes.NameIdentifier, "1"),
-                new Claim(ClaimTypes.Name, "John Doe"),
+                new Claim(ClaimTypes.Name, "John Smith"),
                 new Claim(ClaimTypes.Role, role)
             };
 

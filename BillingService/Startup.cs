@@ -30,6 +30,7 @@ namespace BillingService
             services.AddMvc();
             services.AddDbContext<BillingContext>(options => options.UseSqlServer(Configuration.GetConnectionString("BillingDatabase")));
 
+            //TODO: Store secret key etc appropriately
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -72,7 +73,7 @@ namespace BillingService
                         var claims = new Claim[] {
                             new Claim(ClaimTypes.NameIdentifier, "12"),
                             new Claim(ClaimTypes.Name, "Joe"),
-                            new Claim(ClaimTypes.Role, "Staff")
+                            new Claim(ClaimTypes.Role, "Customer")
                         };
 
                         var token = new JwtSecurityToken(
@@ -95,6 +96,8 @@ namespace BillingService
             }
 
             app.UseStaticFiles();
+
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {
