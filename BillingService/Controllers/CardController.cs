@@ -129,6 +129,7 @@ namespace BillingService.Controllers
             try
             {
                 await PostInvoice();
+                await NotifyOrdering();
                 foreach(BillingProduct bp in _order.Products)
                 {
                     db.Products.Remove(bp);
@@ -156,6 +157,22 @@ namespace BillingService.Controllers
 
                 StringContent httpContent = new StringContent(JsonConvert.SerializeObject(inv));
                 await client.PostAsync(client.BaseAddress.ToString(), httpContent);
+            }
+            catch { throw; }
+        }
+
+        private async Task NotifyOrdering()
+        {
+            try
+            {
+                HttpClient client = new HttpClient();
+                if (User.IsInRole("Customer"))
+                    client.BaseAddress = new Uri("http://localhost:54997/api/CustomerOrdering/BillingComplete/" + _order.OrderId);
+                else
+                    client.BaseAddress = new Uri("http://localhost:50492/api/Staff/BillingComplete/" + _order.OrderId);
+
+
+                await client.PostAsync(client.BaseAddress.ToString(), null);
             }
             catch { throw; }
         }

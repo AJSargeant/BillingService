@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BillingService
+namespace BillingTests
 {
     public static class TokenGen
     {

@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BillingModel;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BillingService.Controllers.API
 {
     [Produces("application/json")]
     [Route("api/Order")]
+    [Authorize(Roles = "Customer, Staff, Admin")]
     public class OrderController : Controller
     {
         private BillingContext db;

@@ -19,7 +19,6 @@ namespace BillingService
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            var v = TokenGen.UserToken("Customer");
         }
 
         public IConfiguration Configuration { get; }
