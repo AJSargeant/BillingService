@@ -29,11 +29,23 @@ namespace BillingService.Controllers
         {
             try
             {
+
                 if (OrderID != null)
-                    _order = db.Orders.Single(o => o.OrderId == OrderID);
+                {
+                    try
+                    {
+                        _order = db.Orders.Single(o => o.OrderId == OrderID);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        _order = null;
+                    }
+                }
                 if (_order == null)
                     return new StatusCodeResult(404);
 
+                if (User.FindFirst(ClaimTypes.NameIdentifier).Value != _order.UserID && !User.IsInRole("Admin"))
+                    return new StatusCodeResult(403);
                 List<SelectListItem> cardList = new List<SelectListItem>();
                 List<Card> cards;
 
@@ -71,18 +83,29 @@ namespace BillingService.Controllers
             try
             {
                 ChosenCard = uo.SelectedCardID;
-                if (ChosenCard == -1)
+                if (User.IsInRole("Customer"))
                 {
-                    return RedirectToAction(nameof(AddCard));
+                    if (ChosenCard == -1)
+                    {
+                        return RedirectToAction(nameof(AddCard));
+                    }
+                    else
+                    {
+                        return RedirectToAction(nameof(Finalise));
+                    }
                 }
                 else
                 {
+                    if(ChosenCard == -1)
+                    {
+                        return RedirectToAction(nameof(AddCard));
+                    }
                     return RedirectToAction(nameof(Finalise));
                 }
             }
             catch
             {
-                return new StatusCodeResult(500);
+                return new StatusCodeResult(400);
             }
 
         }
@@ -98,13 +121,20 @@ namespace BillingService.Controllers
         {
             try
             {
-                c.UserID = _order.UserID;
+                try
+                {
+                    c.UserID = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                }
+                catch (NullReferenceException)
+                {
+                    return new StatusCodeResult(400);
+                }
                 if (User.IsInRole("Customer"))
                     c.Type = "Customer";
                 else
                     c.Type = "Staff";
                 c.Active = true;
-                db.Add(c);
+                db.Cards.Add(c);
                 db.SaveChanges();
                 return RedirectToAction(nameof(PayOrder));
             }
@@ -117,27 +147,35 @@ namespace BillingService.Controllers
         [HttpGet]
         public ActionResult Finalise()
         {
-            Models.Payment pay = new Models.Payment { Order = _order, Card = db.Cards.Where(c => c.Active && c.ID == ChosenCard).First() };
-            return View(pay);
+            try
+            {
+                Models.Payment pay = new Models.Payment { Order = _order, Card = db.Cards.Where(c => c.Active && c.ID == ChosenCard).First() };
+                return View(pay);
+            }
+            catch
+            {
+                return new StatusCodeResult(500);
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult> FinalisePost([FromBody] Models.Payment Payment)
         {
             //INSERT TRANSACTION LOGIC HERE (THIS APP DOESN'T TAKE MONEY FROM REAL ACCOUNTS) 
-
+            if (Payment == null)
+                return new StatusCodeResult(400);
             try
             {
                 await PostInvoice();
                 await NotifyOrdering();
-                foreach(BillingProduct bp in _order.Products)
+                foreach(BillingProduct bp in Payment.Order.Products)
                 {
                     db.Products.Remove(bp);
                 }
-                db.Remove(_order);
+                db.Remove(Payment.Order);
                 db.SaveChanges();
             }
-            catch { }
+            catch { return new StatusCodeResult(500); }
             
             return Redirect("http://localhost:54330/Products/Index");
         }
@@ -158,7 +196,7 @@ namespace BillingService.Controllers
                 StringContent httpContent = new StringContent(JsonConvert.SerializeObject(inv));
                 await client.PostAsync(client.BaseAddress.ToString(), httpContent);
             }
-            catch { throw; }
+            catch { }
         }
 
         private async Task NotifyOrdering()
@@ -174,7 +212,7 @@ namespace BillingService.Controllers
 
                 await client.PostAsync(client.BaseAddress.ToString(), null);
             }
-            catch { throw; }
+            catch { }
         }
     }
 }
