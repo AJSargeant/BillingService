@@ -9,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 namespace BillingTests
 {
@@ -19,6 +20,7 @@ namespace BillingTests
         CardController CardController;
 
         Mock<BillingContext> MockedContext;
+        BillingContext db;
 
         #region data
 
@@ -33,11 +35,25 @@ namespace BillingTests
                 {
                     new BillingProduct
                     {
-                        Ean = 6541,
-
+                        Ean = "6541",
+                        Name = "Product-test-1",
+                        Price = 5.79,
+                        Quantity = 2
+                    },
+                    new BillingProduct
+                    {
+                        Ean = "48965",
+                        Name = "Product-test-2",
+                        Price = 3.14,
+                        Quantity = 5
                     }
                 }
             };
+        }  
+        
+        public Order EmptyOrder()
+        {
+            return new Order() { OrderId = 7 };
         }
 
         #endregion data
@@ -53,12 +69,14 @@ namespace BillingTests
             MockedContext.Setup(c => c.Orders).Returns(new MockDbSet<Order>().Object);
             MockedContext.Setup(c => c.Products).Returns(new MockDbSet<BillingProduct>().Object);
 
+            db = MockedContext.Object;
+
             //Get security token
             var token = TokenGen.UserToken("Customer");
             var testClaims = new ClaimsPrincipal(new ClaimsIdentity(token.Claims));
             
             //Set up OrderController
-            OrderController = new OrderController(MockedContext.Object);
+            OrderController = new OrderController(db);
             OrderController.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()
@@ -69,7 +87,7 @@ namespace BillingTests
             OrderController.ControllerContext.HttpContext.Request.Headers.Add("Authorization", "Bearer " + new JwtSecurityTokenHandler().WriteToken(token));
 
             //Set up Card Controller
-            CardController = new CardController(MockedContext.Object);
+            CardController = new CardController(db);
             CardController.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()
@@ -78,6 +96,8 @@ namespace BillingTests
                 }
             };
             CardController.ControllerContext.HttpContext.Request.Headers.Add("Authorization", "Bearer " + new JwtSecurityTokenHandler().WriteToken(token));
+
+
         }
 
         #endregion
@@ -87,9 +107,19 @@ namespace BillingTests
         #region API
 
         [TestMethod]
-        public void SendOrder()
+        public void SendOrderSuccessful()
         {
+            var response = (StatusCodeResult)OrderController.SaveOrder(SingleTestOrder());
+            Assert.AreEqual(200, response.StatusCode);
+            Assert.IsNotNull(db.Orders.Where(o => o.OrderId == 1));
+        }
 
+        [TestMethod]
+        public void SendOrderNoData()
+        {
+            var response = (StatusCodeResult)OrderController.SaveOrder(EmptyOrder());
+            Assert.AreEqual(400, response.StatusCode);
+            Assert.IsNull(db.Orders.(o => o.OrderId == 7));
         }
 
         #endregion API

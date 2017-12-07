@@ -15,6 +15,7 @@ namespace BillingModel
         [StringLength(16)]
         public string CardNumber { get; set; }
         [Required]
+        [RegularExpression("00/00")]
         public string ExpirationDate { get; set; }
         [Required]
         public string Type { get; set; }

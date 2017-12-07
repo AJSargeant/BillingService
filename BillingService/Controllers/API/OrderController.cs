@@ -24,14 +24,26 @@ namespace BillingService.Controllers.API
         // POST: api/Order
         [HttpPost]
         [Route("SaveOrder")]
-        public void SaveOrder([FromBody]Order Order)
+        public IActionResult SaveOrder([FromBody]Order Order)
         {
-            foreach(BillingProduct bp in Order.Products)
+            try
             {
-                db.Products.Add(bp);
+                if (Order == null || Order.Products == null)
+                    return new StatusCodeResult(400);
+                if (Order.Products.Count == 0)
+                    return new StatusCodeResult(400);
+                foreach (BillingProduct bp in Order.Products)
+                {
+                    db.Products.Add(bp);
+                }
+                db.Orders.Add(Order);
+                db.SaveChanges();
+                return StatusCode(200);
             }
-            db.Orders.Add(Order);
-            db.SaveChanges();
+            catch
+            {
+                return StatusCode(500);
+            }
         }
     }
 }

@@ -10,7 +10,7 @@ namespace BillingService.Models
 {
     public class UserOrder
     {
-        public Orders.Order Order { get; set; }
+        public Order Order { get; set; }
         public IEnumerable<SelectListItem> Cards { get; set; }
         public int SelectedCardID { get; set; }
 

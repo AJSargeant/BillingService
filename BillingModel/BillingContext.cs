@@ -12,9 +12,9 @@ namespace BillingModel
             Database.EnsureCreated();
         }
         public BillingContext() : base(){ }
-        public DbSet<Card> Cards { get; set; }
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<BillingProduct> Products { get; set; }
+        public virtual DbSet<Card> Cards { get; set; }
+        public virtual DbSet<Order> Orders { get; set; }
+        public virtual DbSet<BillingProduct> Products { get; set; }
         
     }
 }
